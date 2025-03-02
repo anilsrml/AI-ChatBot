@@ -3,7 +3,7 @@ Bu proje, Gemini API'yi kullanarak sesli ve yazılı sohbet edebilen bir chatbot
 
 ## 🚀 Özellikler
 * Gemini AI ile sohbet
-* SQLite veritabanı ile son 10 konuşmayı kaydetme
+* SQLite veritabanı ile son 10 konuşmayı kaydederek hafıza oluşturma
 * Ses tanıma (SpeechRecognition)
 * Sesli yanıt verme (pyttsx3)
 * Yazılı veya sesli modda çalışma
