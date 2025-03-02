@@ -7,3 +7,8 @@ Bu proje, Gemini API'yi kullanarak sesli ve yazılı sohbet edebilen bir chatbot
 * Ses tanıma (SpeechRecognition)
 * Sesli yanıt verme (pyttsx3)
 * Yazılı veya sesli modda çalışma
+
+
+### 1️⃣ Gerekli Kütüphaneleri Kurun
+```bash
+pip install google-generativeai speechrecognition pyttsx3
