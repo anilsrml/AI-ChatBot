@@ -4,23 +4,20 @@ from config import API_KEY
 import speech_recognition as sr
 import pyttsx3
 
-# Gemini API'yi başlat
+# 🌟 API'yi başlat
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("gemini-1.5-pro-latest")
 
-# Sesli yanıt motoru başlat
+# 🎙️ Sesli yanıt motorunu başlat
 engine = pyttsx3.init()
 engine.setProperty("rate", 150)  # Konuşma hızını ayarla
 
-# Veritabanını oluştur
+# 📂 Veritabanını oluştur
 create_tables()
 
-
 def chat_gemini(prompt):
-    """Chatbot ile konuşmayı yönetir ve hafızayı son konuşmalardan sağlar."""
-    conversations = get_last_conversations()  # Son konuşmaları al
-
-    # Chatbot'a verilecek metni oluştur
+    """Chatbot ile konuşmayı yönetir ve son konuşmalardan bağlam sağlar."""
+    conversations = get_last_conversations()
     context = "\n".join(conversations) if conversations else ""
     full_prompt = f"Önceki konuşmalar:\n{context}\n\nKullanıcı: {prompt}"
 
@@ -28,77 +25,69 @@ def chat_gemini(prompt):
         response = model.generate_content(full_prompt)
 
         if response and response.text:
-            # Yanıttan "Chatbot:" veya "Ben:" gibi önekleri temizle
-            clean_response = response.text
-            prefixes_to_remove = ["Chatbot:", "Ben:", "Bot:"]
-            for prefix in prefixes_to_remove:
+            clean_response = response.text.strip()
+            for prefix in ["Chatbot:", "Ben:", "Bot:"]:
                 if clean_response.startswith(prefix):
                     clean_response = clean_response[len(prefix):].strip()
 
-            # Konuşmayı kaydet
             save_conversation(prompt, clean_response)
             return clean_response
-        else:
-            print("Chatbot yanıtı alınamadı.")
-            return "Üzgünüm, şu anda yanıt veremiyorum."
-    except Exception as e:
-        print(f"Chatbot yanıtı alınırken hata oluştu: {e}")
+        return "Üzgünüm, şu anda yanıt veremiyorum."
+
+    except Exception as e:  # Daha genel hata yakalama
+        print(f"⚠️ Chatbot hata verdi: {e}")
         return "Bir hata oluştu, lütfen tekrar deneyin."
 
 
 def speak(text):
-    """Chatbot'un metni sesli okumasını sağlar."""
+    """Metni sesli okur."""
     try:
         engine.say(text)
         engine.runAndWait()
     except Exception as e:
-        print(f"Sesli yanıt vermede hata oluştu: {e}")
+        print(f"Sesli yanıt hatası: {e}")
 
 
 def listen():
-    """Kullanıcının sesli komutunu dinler ve metne çevirir."""
+    """Kullanıcının sesli girişini alır ve metne çevirir."""
     recognizer = sr.Recognizer()
-
     with sr.Microphone() as source:
-        print("Dinliyorum... (Mikrofon açılıyor)")
+        print("🎤 Dinliyorum...")
         try:
-            audio = recognizer.listen(source, timeout=10)  # Bekleme süresini artır
-            text = recognizer.recognize_google(audio, language="tr-TR")  # Türkçe dil desteği
-            print(f"Sen: {text}")
+            audio = recognizer.listen(source, timeout=20)
+            text = recognizer.recognize_google(audio, language="tr-TR") 
             return text.lower()
         except sr.UnknownValueError:
-            print("Söylediğinizi anlayamadım, lütfen tekrar edin.")
-            return None
+            return None  # Kullanıcı net konuşmazsa None döndür
         except sr.RequestError:
-            print("Ses tanıma servisine ulaşılamıyor. İnternet bağlantınızı kontrol edin.")
-            return None
+            return "Bağlantı hatası"
 
 
-# Ana döngüde çıktı formatını düzelt
-if __name__ == "__main__":
-    print("Chatbot'a hoş geldiniz! (Çıkış için 'çıkış' yazın veya 'çıkış' deyin.)")
-
+def chat_loop(mode):
+    """Yazılı veya sesli chat modunu çalıştırır."""
     while True:
-        mode = input("Sesli konuşmak için 's', yazılı sohbet için 'y' girin: ").lower()
-
         if mode == "s":
-            while True:
-                user_input = listen()
-                if user_input is None:
-                    continue
-                if "çıkış" in user_input:
-                    print("Chatbot kapanıyor...")
-                    speak("Chatbot kapanıyor, görüşmek üzere.")
-                    break
-                response = chat_gemini(user_input)
-                print(f"Bot: {response}")  # Çıktı formatını düzelt
-                speak(response)
+            user_input = listen()
+            if user_input is None:
+                continue
+        else:
+            user_input = input("Sen: ").strip().lower()
 
-        elif mode == "y":
-            while True:
-                user_input = input("Sen: ")
-                if user_input.lower() == "çıkış":
-                    print("Chatbot kapanıyor...")
-                    break
-                response = chat_gemini(user_input)
-                print(f"ChatBot: {response}")  # Çıktı formatını düzelt
+        if user_input == "çıkış":
+            print("🔴 Chatbot kapanıyor...")
+            speak("Chatbot kapanıyor, görüşmek üzere.")
+            break
+
+        response = chat_gemini(user_input)
+        print(f"Bot: {response}")
+        speak(response)
+
+
+if __name__ == "__main__":
+    print("🤖 Chatbot'a hoş geldiniz! ('çıkış' yazarak çıkabilirsiniz.)")
+    mode = input("🎙️ Sesli mod için 's', yazılı sohbet için 'y' girin: ").strip().lower()
+
+    if mode in ["s", "y"]:
+        chat_loop(mode)
+    else:
+        print("Geçersiz giriş! Program kapanıyor.")
