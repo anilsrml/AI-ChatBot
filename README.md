@@ -1,9 +1,9 @@
 ## Ses Destekli AI Asistan
-Bu proje, Gemini API'yi kullanarak sesli ve yazılı sohbet edebilen bir chatbot uygulamasıdır. Ayrıca, son 10 konuşmayı saklayan bir SQLite veritabanı kullanmaktadır.
+Bu proje, Gemini API'yi kullanarak sesli ve yazılı sohbet edebilen bir chatbot uygulamasıdır. Ayrıca, son 10 konuşmayı SQLite veritabanı ile saklayarak hafıza oluşturmaktadır.
 
 ## 🚀 Özellikler
 * Gemini AI ile sohbet
-* SQLite veritabanı ile son 10 konuşmayı kaydederek hafıza oluşturma
+* Veritabanına son konuşmaları kaydederek hafıza oluşturma
 * Ses tanıma (SpeechRecognition)
 * Sesli yanıt verme (pyttsx3)
 * Yazılı veya sesli modda çalışma
